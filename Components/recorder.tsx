@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, memo, useState } from "react";
 import {
   Box,
   Icon,
@@ -11,13 +11,47 @@ import {
 import { FaVideoSlash, FaDownload, FaCamera } from "react-icons/fa";
 import "video-react/dist/video-react.css";
 import { Player } from "video-react";
-import RecordRTC from "recordrtc";
+import RecordRTC, {
+  // @ts-ignore
+  RecordRTCPromisesHandler,
+} from "recordrtc";
+// import { startRecording, stopRecording } from "./utils";
 
 const Recorder = () => {
   const theme: Theme = useTheme();
   const [recorder, setRecorder] = useState<RecordRTC | null>();
   const [stream, setStream] = useState<MediaStream | null>();
   const [videoBlob, setVideoUrlBlob] = useState<Blob | null>();
+
+  const startRecording = async () => {
+    console.log("reacher recording function");
+    const mediaDevices = navigator.mediaDevices;
+    const stream: MediaStream = await mediaDevices.getUserMedia({
+      video: true,
+      audio: true,
+    });
+
+    const recorder: RecordRTC = new RecordRTCPromisesHandler(stream, {
+      type: "video",
+    });
+
+    await recorder.startRecording();
+    setRecorder(recorder);
+    setStream(stream);
+    setVideoUrlBlob(null);
+  };
+
+  const stopRecording = async () => {
+    if (recorder) {
+      await recorder.stopRecording();
+      const blob: Blob = await recorder.getBlob();
+      (stream as any).stop();
+      setVideoUrlBlob(blob);
+      setStream(null);
+      setRecorder(null);
+    }
+  };
+
   return (
     <>
       <SimpleGrid spacing="5" p="5">
@@ -28,6 +62,7 @@ const Recorder = () => {
             size="lg"
             aria-label="start recording"
             color="white"
+            onclick={startRecording()}
             icon={<Icon as={FaCamera} />}
           />
           <IconButton
@@ -37,6 +72,7 @@ const Recorder = () => {
             color="white"
             aria-label="stop recording"
             disabled={recorder ? false : true}
+            onclick={stopRecording()}
             icon={<Icon as={FaVideoSlash} />}
           />
           <IconButton
@@ -64,4 +100,4 @@ const Recorder = () => {
   );
 };
 
-export default Recorder;
+export default memo(Recorder);
