@@ -9,17 +9,18 @@ import {
   IconButton,
 } from "@chakra-ui/react";
 import { FaVideoSlash, FaDownload, FaCamera } from "react-icons/fa";
+import { MdDelete } from "react-icons/md";
 import "video-react/dist/video-react.css";
 import { Player } from "video-react";
 import RecordRTC, {
   // @ts-ignore
   RecordRTCPromisesHandler,
 } from "recordrtc";
-// import { startRecording, stopRecording } from "./utils";
+import { UploadVideo } from "../utils";
 
 const Recorder = () => {
   const theme: Theme = useTheme();
-  const [recorder, setRecorder] = useState<RecordRTC | null>();
+  const [recorder, setRecorder] = useState<RecordRTC | null>(null);
   const [stream, setStream] = useState<MediaStream | null>();
   const [videoBlob, setVideoUrlBlob] = useState<Blob | null>();
 
@@ -46,10 +47,21 @@ const Recorder = () => {
       await recorder.stopRecording();
       const blob: Blob = await recorder.getBlob();
       (stream as any).stop();
+      console.log(blob);
       setVideoUrlBlob(blob);
       setStream(null);
       setRecorder(null);
     }
+  };
+
+  const deleteVideo = () => {
+    setVideoUrlBlob(null);
+  };
+
+  const downloadTranscript = () => {
+    event.preventDefault();
+    const transcript = UploadVideo(videoBlob);
+    console.log(transcript);
   };
 
   return (
@@ -62,7 +74,7 @@ const Recorder = () => {
             size="lg"
             aria-label="start recording"
             color="white"
-            onclick={startRecording()}
+            onClick={startRecording}
             icon={<Icon as={FaCamera} />}
           />
           <IconButton
@@ -72,7 +84,7 @@ const Recorder = () => {
             color="white"
             aria-label="stop recording"
             disabled={recorder ? false : true}
-            onclick={stopRecording()}
+            onClick={stopRecording}
             icon={<Icon as={FaVideoSlash} />}
           />
           <IconButton
@@ -82,7 +94,18 @@ const Recorder = () => {
             disabled={!!!videoBlob}
             color="white"
             aria-label="download video"
+            onClick={downloadTranscript}
             icon={<Icon as={FaDownload} />}
+          />
+          <IconButton
+            bg={theme.colors.blue[600]}
+            m="1"
+            size="lg"
+            disabled={!videoBlob}
+            color="white"
+            aria-label="download video"
+            onClick={deleteVideo}
+            icon={<Icon as={MdDelete} />}
           />
         </Box>
         <Box className="justify-center flex">
