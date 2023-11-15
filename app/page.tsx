@@ -1,13 +1,14 @@
-'use client'
-
-import {Header, Recorder} from '@/Components'
-
+"use client";
+import { ChakraProvider } from "@chakra-ui/react";
+import { Header, Recorder, UploadVideo } from "@/Components";
+import theme from "./theme";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <Header/>
-      <Recorder/>
-    </main>
-  )
+    <ChakraProvider>
+      <Header />
+      <Recorder />
+      <UploadVideo />
+    </ChakraProvider>
+  );
 }
